@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack://src/index.css"],"names":[],"mappings":"AAAA,yBACI,OACE,cACF,CAEA,YACE,aAAc,CACd,eACF,CACF","file":"main.208d1090.chunk.css","sourcesContent":["@media all and (min-width: 480px) {\r\n    .Login {\r\n      padding: 60px 0;\r\n    }\r\n  \r\n    .Login form {\r\n      margin: 0 auto;\r\n      max-width: 320px;\r\n    }\r\n  }"]}
