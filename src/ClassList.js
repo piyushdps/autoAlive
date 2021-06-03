@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import ListGroup from "react-bootstrap/ListGroup";
-import Container from "react-bootstrap/Container";
-import moment from "moment";
 import axios from "axios";
 const ClassList = ({ classListArray, auth }) => {
   const TimeLimitInMS = 10 * 60 * 1000;
@@ -52,28 +50,25 @@ const ClassList = ({ classListArray, auth }) => {
     });
   };
 
-  let intervalID = "";
+  const [intervalID,setIntervalID] = useState('')
 
   useEffect(() => {
     setList(list());
   }, [classListArray, activeClass]);
 
-  useEffect(() => {
-    setInterval(function () {
-      if (trigger) {
-        setIsClassActive(false);
-      }
-    }, TimeLimitInMS);
-  }, [trigger]);
 
   // TImer and CLass join code
   useEffect(() => {
+    let id = ''
     if (classListArray) {
+    
       checkAndGetClassUrl();
-      intervalID = setInterval(function () {
+    
+       id  = setInterval(function () {
         checkAndGetClassUrl();
       }, TimeLimitInMS);
     }
+    setIntervalID(id)
 
     return () => {
       console.log("Interval Disabled", intervalID);
