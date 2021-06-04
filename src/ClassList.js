@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import ListGroup from "react-bootstrap/ListGroup";
 import axios from "axios";
+import { ToastProvider, useToasts } from 'react-toast-notifications';
 const ClassList = ({ classListArray, auth }) => {
-  const TimeLimitInMS = 10 * 60 * 1000;
+  
+  const [TimeLimitInMS, setTimeLimitInMS] = useState(10 * 60 * 1000);
+
+  const { addToast } = useToasts();
   const [List, setList] = useState(<></>);
   const [activeClass, setActiveClass] = useState("");
   const [isClassActive, setIsClassActive] = useState(false);
@@ -30,6 +34,13 @@ const ClassList = ({ classListArray, auth }) => {
   const checkAndGetClassUrl = async () => {
     const url = "https://api.alive.university/api/v1/join-session";
     classListArray?.forEach(async (classToJoin) => {
+      let currentDate = new Date();
+      let currentHour = currentDate.getHours();
+      let currentMinute = currentDate.getMinutes();
+      
+      if( parseInt(classToJoin.eTime.split(":")[0]) === parseInt( currentHour) )
+{
+
       try {
         const res = await axios.post(url, classToJoin, auth);
 
@@ -41,12 +52,17 @@ const ClassList = ({ classListArray, auth }) => {
           setIsClassActive(true);
           setTrigger(true);
         } else {
-          console.log(`${classToJoin.subject_name_short} has not yet started `);
+
+          addToast(`${classToJoin.subject_name_short} has not yet started `, { appearance: 'info'  , autoDismiss:true });
         }
       } catch (error) {
         console.log(error);
         return;
       }
+
+}else{
+  addToast(`No Class Available in this Hour Take a break`, { appearance: 'info'  , autoDismiss:true });
+}
     });
   };
 
@@ -56,14 +72,15 @@ const ClassList = ({ classListArray, auth }) => {
     setList(list());
   }, [classListArray, activeClass]);
 
+  useEffect(() => {
+    if(classListArray){ checkAndGetClassUrl();}
+    
+  }, [])
 
   // TImer and CLass join code
   useEffect(() => {
     let id = ''
     if (classListArray) {
-    
-      checkAndGetClassUrl();
-    
        id  = setInterval(function () {
         checkAndGetClassUrl();
       }, TimeLimitInMS);
@@ -76,7 +93,12 @@ const ClassList = ({ classListArray, auth }) => {
     };
   }, [classListArray]);
 
-  return <ListGroup>{List}</ListGroup>;
+  return <div><ListGroup>{List}</ListGroup>
+  
+  <br/>
+  {/* <iframe src={classUrlFetched}  width={'100%'} ></iframe> */}
+  
+  </div>;
 };
 
 export default ClassList;

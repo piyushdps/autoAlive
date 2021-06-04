@@ -5,12 +5,20 @@ import {Button,ButtonGroup} from "react-bootstrap";
 import "./index.css";
 import ClassList from "./ClassList";
 import Container from "react-bootstrap/esm/Container";
+import Cookies from 'universal-cookie';
+import { useToasts } from "react-toast-notifications";
+
+
+
 function App() {
 // states
+const cookies = new Cookies();
 const [auid, setAuid] = useState("");
 const [password, setPassword] = useState("");
 const [token, setToken] = useState('');
 const [userData , setUserData] = useState({});
+
+const { addToast } = useToasts();
 const [classListArray , setClassListArray] = useState([]);
 
 const [starter , setStarter]=useState(false)
@@ -27,36 +35,101 @@ const [status,setStatus] = useState(false)
 //  LOGIN FUNCTION 
 const login = async () =>
 {
+ 
 const url = 'https://api.alive.university/api/v1/login/erp'
 const data = {username: auid.toLowerCase(), password: password, usertype: "STUDENT"}
 try {
   const res =  await axios.post(url , data)
- console.log(res.data)
  if(res.data.status){
    setStatus(true)
+   setCookie(res.data.token, 'token', 365);
+   setToken(res.data.token)
  }else{
    setStatus(false)
+  addToast("Login Error :  Wrong AUID or Password", { appearance: 'error'  , autoDismiss:true });
+
  }
- setToken(res.data.token)
+
 
 } catch (error) {
-  console.log("LOGIN ERROR"+error)
+  addToast("Login Error : "+error, { appearance: 'error'  , autoDismiss:true });
+
 }
 
 }
+
+
+
+function setCookie(cname, cvalue, exdays) {
+  cookies.set( cvalue,cname, { path: '/' });
+}
+
+
+
+
+// 
+
+
+
+
+
+
+function getCookie(cname) {
+if( cookies.get(cname)){
+  return cookies.get(cname)
+}else 
+  return""
+} 
+
+
+
+
+
+
+
+function checkCookie() {
+  let token = getCookie("token");
+  
+  if (token !== "") {
+  setStatus(true);
+  setToken(token);
+return
+  } else {
+   setStatus(false)
+   
+    }
+
+    getUser();
+  }
+
+
+
+useEffect(() => {
+ checkCookie()
+
+}, [])
+
+
+
+
 //  GET USER FUNCTION
 const getUser = async() => {
 const url = 'https://api.alive.university/api/v1/user'
 
+
+if(token){
 try {
   const res = await  axios.get(url,auth )
 
   console.log(res.data.data)
   setUserData(res.data.data)
 } catch (error) {
-  console.log("GET USER DATA ERROR"+error)
-}
+  console.log()
+  addToast("GET USER DATA ERROR"+error, { appearance: 'error'  , autoDismiss:true });
 
+}
+}
+else return 
 
 }
 // GET ROOMS FUNCTION
@@ -71,7 +144,8 @@ try {
   setClassListArray(classArray)
 
 } catch (error) {
-  
+  addToast("Error while Fetching The Rooms"+error, { appearance: 'error'  , autoDismiss:true });
+
 }
 
 }
@@ -147,26 +221,32 @@ function handleSubmit(event) {
           onChange={(e) => setPassword(e.target.value)}
         />
       </Form.Group>
-      <Button block size="lg" type="submit" disabled={!validateForm()}>
+      <Button block size="lg" variant={!status?"primary" : "light"}  type="submit" disabled={!validateForm() || status}>
         Login
+      </Button>
+      <Button block size="lg" variant={status?"danger" : "light"} onClick={e=>{ cookies.remove('token') ; setStatus(false) ; setStarter(false);}} type="reset" disabled={!status}>
+      Logout
       </Button>
     </Form>
   </div>
 
    
     <div style={{display:'flex' , justifyContent:'space-between'}} className='Login'>
-  <h3>LOGIN STATUS : {status? '✔' : '❌'}</h3>
+  <h3>Logged In : {status? '✔' : '❌'} </h3>
  {status&&<ButtonGroup aria-label="Basic example">
+
+
   <Button variant="light" disabled> Start Auto Class Join</Button>
   <Button variant={!starter?"secondary":"primary"}  disabled={starter?true:false} onClick={e=>{setStarter(true)}}>ON</Button>
   <Button variant={starter?"secondary":"primary"} disabled={!starter?true:false} onClick={e=>{setStarter(false)}}>OFF</Button>
   </ButtonGroup>}
   </div>
- 
- {starter?<ClassList classListArray = {classListArray }  auth={auth}/>: "AutoAlive is disabled. Login and Toggle on the switch to search for classes "}
+  <h3>{userData?.session_data?.student_name && 'Hi,' + userData?.session_data?.student_name}</h3>
+
 
  <br/>
  <br/>
+ {starter?<ClassList classListArray = {classListArray }  auth={auth}/>: <h5>AutoAlive is disabled. Login and Toggle on the switch to search for classes </h5>}
  <br/>
  <p>
 
