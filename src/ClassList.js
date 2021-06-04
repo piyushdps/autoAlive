@@ -3,7 +3,7 @@ import ListGroup from "react-bootstrap/ListGroup";
 import axios from "axios";
 import { ToastProvider, useToasts } from "react-toast-notifications";
 const ClassList = ({ classListArray, auth,intervalID, setIntervalID }) => {
-  const [TimeLimitInMS, setTimeLimitInMS] = useState(10 * 1000);
+  const [TimeLimitInMS, setTimeLimitInMS] = useState(60*10 * 1000);
   // const [TimeLimitInMS, setTimeLimitInMS] = useState(10* 1000);
   const [lastRefresh , setLastRefresh] = useState("")
 
