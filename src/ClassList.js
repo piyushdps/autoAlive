@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import ListGroup from "react-bootstrap/ListGroup";
 import axios from "axios";
-import { ToastProvider, useToasts } from 'react-toast-notifications';
-const ClassList = ({ classListArray, auth }) => {
-  
-  const [TimeLimitInMS, setTimeLimitInMS] = useState(10 * 60 * 1000);
+import { ToastProvider, useToasts } from "react-toast-notifications";
+const ClassList = ({ classListArray, auth,intervalID, setIntervalID }) => {
+  const [TimeLimitInMS, setTimeLimitInMS] = useState(10 * 1000);
+  // const [TimeLimitInMS, setTimeLimitInMS] = useState(10* 1000);
+  const [lastRefresh , setLastRefresh] = useState("")
 
   const { addToast } = useToasts();
   const [List, setList] = useState(<></>);
@@ -33,72 +34,80 @@ const ClassList = ({ classListArray, auth }) => {
 
   const checkAndGetClassUrl = async () => {
     const url = "https://api.alive.university/api/v1/join-session";
-    classListArray?.forEach(async (classToJoin) => {
-      let currentDate = new Date();
+    let currentDate = new Date();
       let currentHour = currentDate.getHours();
       let currentMinute = currentDate.getMinutes();
+      setLastRefresh(`${currentHour}:${currentMinute}`)
+    classListArray?.forEach(async (classToJoin) => {
       
-      if( parseInt(classToJoin.eTime.split(":")[0]) === parseInt( currentHour) )
-{
 
-      try {
-        const res = await axios.post(url, classToJoin, auth);
+      if (parseInt(classToJoin.eTime.split(":")[0]) === parseInt(currentHour)) {
+        try {
+          const res = await axios.post(url, classToJoin, auth);
 
-        console.log(res.data);
+          console.log(res.data);
 
-        if (res.data.status === true) {
-          window.open(res.data.data, "_blank");
-          setActiveClass(classToJoin.subject_name_short);
-          setIsClassActive(true);
-          setTrigger(true);
-        } else {
-
-          addToast(`${classToJoin.subject_name_short} has not yet started `, { appearance: 'info'  , autoDismiss:true });
+          if (res.data.status === true) {
+            window.open(res.data.data, "_blank");
+            setActiveClass(classToJoin.subject_name_short);
+            setIsClassActive(true);
+            setTrigger(true);
+          } else {
+            addToast(`${classToJoin.subject_name_short} has not yet started `, {
+              appearance: "info",
+              autoDismiss: true,
+            });
+          }
+        } catch (error) {
+          console.log(error);
+          return;
         }
-      } catch (error) {
-        console.log(error);
-        return;
+      } else {
+        addToast(`No Class Available in this Hour Take a break`, {
+          appearance: "success",
+          autoDismiss: true,
+        });
       }
-
-}else{
-  addToast(`No Class Available in this Hour Take a break`, { appearance: 'info'  , autoDismiss:true });
-}
     });
   };
 
-  const [intervalID,setIntervalID] = useState('')
+
 
   useEffect(() => {
     setList(list());
   }, [classListArray, activeClass]);
 
   useEffect(() => {
-    if(classListArray){ checkAndGetClassUrl();}
-    
-  }, [])
+    if (classListArray) {
+      checkAndGetClassUrl();
+    }
+  }, []);
 
   // TImer and CLass join code
   useEffect(() => {
-    let id = ''
+    let id = "";
     if (classListArray) {
-       id  = setInterval(function () {
+      id = setInterval(function () {
         checkAndGetClassUrl();
       }, TimeLimitInMS);
     }
-    setIntervalID(id)
+    setIntervalID(id);
 
     return () => {
       console.log("Interval Disabled", intervalID);
       clearInterval(intervalID);
     };
-  }, [classListArray]);
+  }, []);
 
-  return <div><ListGroup>{List}</ListGroup>
-  
-  <br/>
-  {/* <iframe src={classUrlFetched}  width={'100%'} ></iframe> */}
-  
-  </div>;
+  return (
+    <div>
+      <b>Last Refreshed at { lastRefresh}</b>
+      <ListGroup>{List}</ListGroup>
+
+      <br />
+      {/* <iframe src={classUrlFetched}  width={'100%'} ></iframe> */}
+    </div>
+  );
 };
 
 export default ClassList;

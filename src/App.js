@@ -17,6 +17,7 @@ const [auid, setAuid] = useState("");
 const [password, setPassword] = useState("");
 const [token, setToken] = useState('');
 const [userData , setUserData] = useState({});
+const [intervalID, setIntervalID] = useState("");
 
 const { addToast } = useToasts();
 const [classListArray , setClassListArray] = useState([]);
@@ -207,6 +208,7 @@ function handleSubmit(event) {
       <Form.Group size="lg" controlId="email">
         <Form.Label>AUID</Form.Label>
         <Form.Control
+          disabled={ status}
           autoFocus
           type="text"
           value={auid}
@@ -216,6 +218,7 @@ function handleSubmit(event) {
       <Form.Group size="lg" controlId="password">
         <Form.Label>Password</Form.Label>
         <Form.Control
+        disabled={ status}
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -224,7 +227,7 @@ function handleSubmit(event) {
       <Button block size="lg" variant={!status?"primary" : "light"}  type="submit" disabled={!validateForm() || status}>
         Login
       </Button>
-      <Button block size="lg" variant={status?"danger" : "light"} onClick={e=>{ cookies.remove('token') ; setStatus(false) ; setStarter(false);}} type="reset" disabled={!status}>
+      <Button block size="lg" variant={status?"danger" : "light"} onClick={e=>{ cookies.remove('token') ; setStatus(false);clearInterval(intervalID) ;setUserData({}); setStarter(false);}} type="reset" disabled={!status}>
       Logout
       </Button>
     </Form>
@@ -238,15 +241,19 @@ function handleSubmit(event) {
 
   <Button variant="light" disabled> Start Auto Class Join</Button>
   <Button variant={!starter?"secondary":"primary"}  disabled={starter?true:false} onClick={e=>{setStarter(true)}}>ON</Button>
-  <Button variant={starter?"secondary":"primary"} disabled={!starter?true:false} onClick={e=>{setStarter(false)}}>OFF</Button>
+  <Button variant={starter?"secondary":"primary"} disabled={!starter?true:false} onClick={e=>{setStarter(false); 
+  clearInterval(intervalID)
+  }}>OFF</Button>
   </ButtonGroup>}
   </div>
-  <h3>{userData?.session_data?.student_name && 'Hi,' + userData?.session_data?.student_name}</h3>
+  <h5>{userData?.session_data?.student_name && 'Hi,' + userData?.session_data?.student_name}</h5>
+  {userData?.session_data?.student_name && <h5>FEE PAYMENT : {userData?.session_data?.due_status ? "Fees Not Paid " : "Fees Paid " }</h5>}
+  {userData?.session_data?.student_name && <h5>ELIGIBLITY : {userData?.session_data?.eligible_status ? "Eligible to attend Classes" : "Not Eligible to attend Classes " }</h5>}
 
 
  <br/>
  <br/>
- {starter?<ClassList classListArray = {classListArray }  auth={auth}/>: <h5>AutoAlive is disabled. Login and Toggle on the switch to search for classes </h5>}
+ {starter?<ClassList classListArray = {classListArray }  auth={auth} intervalID={intervalID} setIntervalID={setIntervalID} />: <h5>AutoAlive is disabled. Login and Toggle on the switch to search for classes </h5>}
  <br/>
  <p>
 
