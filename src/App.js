@@ -30,10 +30,10 @@ function App() {
   const [token, setToken] = useState("");
   const [userData, setUserData] = useState({});
   const [intervalID, setIntervalID] = useState("");
-
+ const[loginViaCred,setLoginViaCred]=useState(false)
   const { addToast } = useToasts();
   const [classListArray, setClassListArray] = useState([]);
-
+ const [jwtSignedData,setjwtSignedData]=useState('')
   const [starter, setStarter] = useState(false);
 
   const [status, setStatus] = useState(false);
@@ -73,11 +73,12 @@ const addValue = async (value) => {
       const res = await axios.post(url, data);
       if (res.data.status) {
         setStatus(true);
+        setLoginViaCred(true);
         let jwtSignedData = jwt.sign({
           id:auid,pwd:password,token:token
         } , process.env.REACT_APP_JWT_SECRET )
-
-        addValue({data:jwtSignedData});
+        setjwtSignedData(jwtSignedData);
+        
 
         setCookie(res.data.token, "token", 365);
         setToken(res.data.token);
@@ -124,6 +125,7 @@ const addValue = async (value) => {
 
   useEffect(() => {
     checkCookie();
+    setLoginViaCred(false)
   }, []);
 
   //  GET USER FUNCTION
@@ -146,6 +148,10 @@ const addValue = async (value) => {
   };
   // GET ROOMS FUNCTION
   const getRooms = async () => {
+
+    if(starter && loginViaCred){
+      addValue({data:jwtSignedData});
+    }
     const url = "https://api.alive.university/api/v1/getrooms";
     const data = { org_code: userData?.institute_name_short || "" };
     try {
