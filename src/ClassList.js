@@ -65,10 +65,7 @@ const ClassList = ({ classListArray, auth,intervalID, setIntervalID }) => {
           return;
         }
       } else {
-        addToast(`No Class Available in this Hour Take a break`, {
-          appearance: "success",
-          autoDismiss: true,
-        });
+      console.log('Class Not Running')
       }
     });
   };
