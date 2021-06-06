@@ -14,8 +14,10 @@ const ClassList = ({ classListArray, auth,intervalID, setIntervalID }) => {
   const [trigger, setTrigger] = useState(false);
 
   var list = () => {
-    if (classListArray && classListArray !== []) {
-      var lis = classListArray?.map((classes, i) => (
+    let lis = <></>
+    console.log('CHECK' , (classListArray && classListArray?.length !==0))
+    if (classListArray &&  classListArray?.length !==0) {
+     lis = classListArray?.map((classes, i) => (
         <ListGroup.Item
           key={i}
           variant={classes.subject_name_short === activeClass ? "success" : ""}
@@ -23,8 +25,8 @@ const ClassList = ({ classListArray, auth,intervalID, setIntervalID }) => {
           {`${classes?.subject_name_short} |  Time : ${classes.interval} `}
         </ListGroup.Item>
       ));
-    } else {
-      return "NO CLASSES FOUND";
+    } else if(classListArray?.length === 0) {
+      lis =<ListGroup.Item>  NO CLASSES FOUND FOR THE DAY </ListGroup.Item>;
     }
 
     return lis;
@@ -105,7 +107,7 @@ const ClassList = ({ classListArray, auth,intervalID, setIntervalID }) => {
       <ListGroup>{List}</ListGroup>
 
       <br />
-      {/* <iframe src={classUrlFetched}  width={'100%'} ></iframe> */}
+    
     </div>
   );
 };

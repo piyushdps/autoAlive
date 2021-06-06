@@ -21,8 +21,6 @@ function App() {
  }, [])
 
 
-
-
   // states
   const cookies = new Cookies();
   const [auid, setAuid] = useState("");
@@ -159,6 +157,8 @@ const addValue = async (value) => {
       console.log(res.data.data);
       let classArray = res.data.data;
       setClassListArray(classArray);
+
+    console.log("CLASS ARRAY" ,classArray?.length)
     } catch (error) {
       addToast("Error while Fetching The Rooms" + error, {
         appearance: "error",
@@ -315,10 +315,11 @@ const addValue = async (value) => {
             setIntervalID={setIntervalID}
           />
         ) : (
-          <h5>
+          <blink>
+          <h5 style={{color:'red'}}>
             AutoAlive is disabled. Login and Toggle on the switch to search for
             classes{" "}
-          </h5>
+          </h5></blink>
         )}
         <br />
         <p>
