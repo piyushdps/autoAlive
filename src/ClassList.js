@@ -43,7 +43,7 @@ const ClassList = ({ classListArray, auth,intervalID, setIntervalID }) => {
     classListArray?.forEach(async (classToJoin) => {
       
 
-      if (parseInt(classToJoin.eTime.split(":")[0]) === parseInt(currentHour)) {
+      if (parseInt(classToJoin.sTime.split(":")[0]) === parseInt(currentHour)) {
         try {
           const res = await axios.post(url, classToJoin, auth);
 
